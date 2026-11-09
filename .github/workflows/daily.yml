@@ -14,10 +14,13 @@ jobs:
         with:
           python-version: "3.12"
       - run: python fetch_prices.py
+      - name: K 線資料
+        if: always()
+        run: python fetch_ohlc.py
       - name: 存檔
         if: always()
         run: |
           git config user.name "price-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add data/prices.json || true
+          git add data/prices.json data/ohlc.json || true
           git diff --cached --quiet || (git commit -m "update crypto prices" && git push)
