@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>許仙資本 加密貨幣基金月報</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;800&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+[hidden]{display:none!important}
+body{margin:0}
+/* 版面：單欄報告書，上方淨值摘要 → 走勢 → 月度 → 持倉 → 交易 → 投資人 → 填寫欄位 → 說明 */
+:root{
+  --bg:#f3f4f1; --panel:#ffffff; --ink:#1d2430; --muted:#5d6675; --line:#d9ddd6;
+  --accent:#a8641a; --accent-soft:#f4e6d3;
+  --up:#c8372d; --down:#1f8a5b;   /* 台灣慣例：紅漲綠跌 */
+  --warn:#b8860b; --fill-bg:#fbf7ef;
+  --f-display:"Noto Serif TC","Songti TC",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13171d; --panel:#1b2028; --ink:#e7e9ec; --muted:#9aa3b0; --line:#2c333d;
+  --accent:#e0a253; --accent-soft:#3a2d1b; --up:#ef6a5e; --down:#4cc58e; --warn:#e3b341; --fill-bg:#1f1d18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13171d; --panel:#1b2028; --ink:#e7e9ec; --muted:#9aa3b0; --line:#2c333d;
+  --accent:#e0a253; --accent-soft:#3a2d1b; --up:#ef6a5e; --down:#4cc58e; --warn:#e3b341; --fill-bg:#1f1d18; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.65}
+.wrap{max-width:980px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:40px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)}
+h1,h2{font-family:var(--f-display);text-wrap:balance;margin:0}
+h2{font-size:21px;display:flex;align-items:baseline;gap:10px}
+h2 small{font-family:var(--f-body);font-size:12px;color:var(--muted);font-weight:400;letter-spacing:.04em}
+section{display:flex;flex-direction:column;gap:14px}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--accent);font-weight:700}
+
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:18px}
+header h1{font-size:clamp(26px,5vw,38px);line-height:1.2}
+.meta{color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:2px}
+.toggle{display:inline-flex;border:1px solid var(--ink);border-radius:999px;overflow:hidden}
+.toggle button{font:600 13px var(--f-body);padding:7px 16px;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.toggle button:focus-visible,.trade summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fxnote{font-size:12px;color:var(--muted);margin-top:6px;text-align:right}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.kpi{background:var(--panel);padding:16px 18px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi .k{font-size:12px;color:var(--muted);letter-spacing:.06em}
+.kpi .v{font-family:var(--f-num);font-size:clamp(20px,3.2vw,26px);font-weight:500;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi .s{font-size:12px;color:var(--muted)}
+.kpi.lead .v{color:var(--accent)}
+
+.chart-box{background:var(--panel);border:1px solid var(--line);padding:14px 10px 6px;position:relative}
+#chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);padding:0 8px 8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.legend i.bs{width:16px;height:16px;color:#fff;font:700 10px/16px var(--f-num);font-style:normal;text-align:center;vertical-align:-3px}
+.kbox{display:flex;flex-direction:column;gap:8px;padding:14px}
+.ktop{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.ktop .legend{padding:0}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tabs button{font:500 13px var(--f-body);padding:6px 12px;border:0;border-right:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.tabs button:last-child{border-right:0}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.tabs button:disabled{opacity:.4;cursor:not-allowed}
+.kinfo{font-size:12px;color:var(--muted);min-height:18px;display:flex;flex-wrap:wrap;gap:4px 12px}
+.kinfo b{color:var(--ink);font-weight:500}
+#kline{height:440px;width:100%}
+@media (max-width:640px){#kline{height:340px}}
+.knote{font-size:12px;color:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:8px 10px;border-radius:6px;line-height:1.5;white-space:nowrap}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{padding:10px 14px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.04em;background:var(--bg)}
+td{font-family:var(--f-num);font-size:14px}
+th:first-child,td:first-child{text-align:left;font-family:var(--f-body);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tfoot td{font-weight:700;border-top:2px solid var(--ink)}
+
+.pos{background:var(--panel);border:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);}
+.pos .main{padding:20px;display:flex;flex-direction:column;gap:14px;border-right:1px solid var(--line)}
+.pos .side{padding:20px;display:flex;flex-direction:column;gap:12px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.tag.closed{background:var(--bg);color:var(--muted)}
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px 18px}
+.dl div{display:flex;flex-direction:column;min-width:0}
+.dl dt{font-size:12px;color:var(--muted)}
+.dl dd{margin:0;font-family:var(--f-num);font-size:15px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.big{font-family:var(--f-num);font-size:28px;font-weight:500}
+.meter{height:8px;background:var(--bg);border-radius:4px;position:relative;overflow:hidden;border:1px solid var(--line)}
+.meter span{position:absolute;inset:0 auto 0 0;background:var(--warn)}
+.risk{font-size:13px;color:var(--muted)}
+
+.trades{display:flex;flex-direction:column;gap:10px}
+.trade{background:var(--panel);border:1px solid var(--line)}
+.trade summary{list-style:none;cursor:pointer;padding:14px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:6px 16px;align-items:center}
+.trade summary::-webkit-details-marker{display:none}
+.trade .id{font-family:var(--f-display);font-size:22px;font-weight:800;width:34px;height:34px;display:grid;place-items:center;border:1.5px solid var(--ink);border-radius:50%}
+.trade .route{font-family:var(--f-num);font-size:14px;min-width:0}
+.trade .route small{display:block;font-family:var(--f-body);color:var(--muted);font-size:12px}
+.trade .pl{font-family:var(--f-num);font-size:17px;font-weight:500;text-align:right}
+.trade .body{padding:4px 18px 18px;display:flex;flex-direction:column;gap:14px;border-top:1px dashed var(--line)}
+.trade .body .dl{padding-top:12px}
+
+.fill{background:var(--fill-bg);border:1.5px dashed var(--accent);padding:14px 16px;color:var(--muted);font-size:14px;min-height:64px}
+.fill b{color:var(--accent);font-weight:700;display:block;font-size:12px;letter-spacing:.08em;margin-bottom:4px}
+.fill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.fill-grid{grid-template-columns:1fr}}
+.fill-grid .fill{min-height:120px}
+.log{font-size:13px}
+.log b{font-size:12px}
+
+.notes{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.notes ul{margin:0;padding-left:20px}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+
+@media (max-width:640px){
+  .pos{grid-template-columns:1fr}.pos .main{border-right:0;border-bottom:1px solid var(--line)}
+  .trade summary{grid-template-columns:auto 1fr}.trade .pl{grid-column:2;text-align:left}
+  header{align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header>
+  <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+    <span class="eyebrow">許仙資本 HSU XIAN CAPITAL · 加密貨幣基金</span>
+    <h1>投資人月報 · 第一期</h1>
+    <div class="meta">
+      <span>報告期間：2026/09/01 – 2026/11/10</span>
+      <span id="asof"></span>
+    </div>
+  </div>
+  <div>
+    <div class="toggle" role="group" aria-label="顯示幣別">
+      <button id="cur-usdt" aria-pressed="true">USDT</button>
+      <button id="cur-twd" aria-pressed="false">新台幣</button>
+    </div>
+    <div class="fxnote" id="fxnote"></div>
+  </div>
+</header>
+
+<section aria-label="淨值摘要">
+  <div class="kpis">
+    <div class="kpi lead"><span class="k">基金淨值</span><span class="v" id="k-eq"></span><span class="s" id="k-eq-s"></span></div>
+    <div class="kpi"><span class="k">單位淨值（起始 10.000 USDT）</span><span class="v" id="k-nav"></span><span class="s" id="k-nav-s"></span></div>
+    <div class="kpi"><span class="k">已實現損益</span><span class="v" id="k-real"></span><span class="s">4 筆已平倉，已扣手續費</span></div>
+    <div class="kpi"><span class="k">未實現損益</span><span class="v" id="k-unrl"></span><span class="s" id="k-unrl-s"></span></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-btc">
+  <h2 id="h-btc">BTC K 線與買賣點 <small>BTCUSDT・台灣時間</small></h2>
+  <div class="chart-box kbox">
+    <div class="ktop">
+      <div class="tabs" role="group" aria-label="K 線週期">
+        <button id="tf-1H" data-tf="1H" aria-pressed="false">1 小時</button>
+        <button id="tf-4H" data-tf="4H" aria-pressed="false">4 小時</button>
+        <button id="tf-1D" data-tf="1D" aria-pressed="true">日線</button>
+        <button id="tf-1W" data-tf="1W" aria-pressed="false">週線</button>
+      </div>
+      <div class="legend">
+        <span><i class="bs" style="background:var(--down)">B</i>買進 Buy</span>
+        <span><i class="bs" style="background:var(--up)">S</i>賣出 Sell</span>
+        <span><i style="background:var(--muted);border-radius:0;height:2px;vertical-align:3px"></i>持倉均價</span>
+      </div>
+    </div>
+    <div class="kinfo num" id="kinfo"></div>
+    <div id="kline"></div>
+    <div id="chart-btc" hidden></div>
+    <div class="tip" id="tip-btc" hidden></div>
+    <div class="knote" id="knote"></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-chart">
+  <h2 id="h-chart">每日資產淨值 <small>以每日收盤價估算</small></h2>
+  <div class="chart-box">
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>基金淨值</span>
+      <span><i style="background:var(--muted);border-radius:0;height:2px;vertical-align:3px"></i>投入本金</span>
+    </div>
+    <div id="chart"></div>
+    <div class="tip" id="tip" hidden></div>
+  </div>
+</section>
+
+<section aria-labelledby="h-month">
+  <h2 id="h-month">月度損益紀錄 <small>每月更新一次，逐月累加</small></h2>
+  <div class="tbl"><table>
+    <thead><tr><th>月份</th><th>期初淨值</th><th>期末淨值</th><th>當月損益</th><th>當月報酬</th><th>累計報酬</th></tr></thead>
+    <tbody id="months"></tbody>
+  </table></div>
+</section>
+
+<section aria-labelledby="h-pos">
+  <h2 id="h-pos">目前持倉 <small>BTCUSDT 永續合約・全倉</small></h2>
+  <div class="pos" id="pos"></div>
+</section>
+
+<section aria-labelledby="h-trades">
+  <h2 id="h-trades">交易明細 <small>依進場日期排列，點開看細節</small></h2>
+  <div class="trades" id="trades"></div>
+</section>
+
+<section aria-labelledby="h-inv">
+  <h2 id="h-inv">投資人權益</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>投資人</th><th>投入本金</th><th>持有單位</th><th>目前價值</th><th>損益</th><th>報酬率</th></tr></thead>
+    <tbody id="inv"></tbody>
+    <tfoot id="inv-total"></tfoot>
+  </table></div>
+</section>
+
+<section aria-labelledby="h-view">
+  <h2 id="h-view">行情分析與操作說明 <small>經理人撰寫</small></h2>
+  <!-- ===== 填寫區：把「待填寫」那一行換成你的內容即可 ===== -->
+  <div class="fill-grid">
+    <div class="fill"><b>本期市場回顧</b><span>待填寫：9 月到 11 月 BTC 與整體幣市的走勢、重要事件。</span></div>
+    <div class="fill"><b>BTC 行情看法</b><span>待填寫：對後市的看法、關鍵支撐與壓力價位。</span></div>
+    <div class="fill"><b>本期操作檢討</b><span>待填寫：這期做得好與要改進的地方，例如 B、C 停損的原因。</span></div>
+    <div class="fill"><b>下期操作策略</b><span>待填寫：持倉單的處理計畫、加減碼條件、停損設定。</span></div>
+  </div>
+  <div class="fill"><b>經理人的話</b><span>待填寫：給投資人的一段話。</span></div>
+</section>
+
+<section aria-labelledby="h-notes">
+  <h2 id="h-notes">計算方式與風險揭露</h2>
+  <div class="notes">
+    <ul>
+      <li>投入本金 34,166 USDT，2026/9/1 起算，每單位起始淨值 10 USDT，共 3,416.6 單位。</li>
+      <li>基金淨值＝本金＋已實現損益＋未實現損益－持倉單開倉手續費。不使用交易所帳戶餘額，資金費率尚未計入。</li>
+      <li>倉位價值＝保證金×槓桿；數量＝倉位價值÷進場價；損益＝數量×（出場價－進場價）。手續費以 Bybit 限價單 0.035%，開倉、平倉各收一次。</li>
+      <li>每日價值圖使用 OKX 現貨日收盤價（台灣時間日界），與 Bybit 永續合約價格略有差距，僅供參考。</li>
+      <li>強平價為全倉模式的估算值（維持保證金率以 0.5% 計，假設全部本金都在帳戶內），實際以 Bybit 顯示為準。</li>
+      <li>新台幣金額以當日 USDT/TWD 匯率換算，匯率變動也會影響台幣報酬。</li>
+      <li>合約交易使用槓桿，價格反向波動時虧損會放大，最壞情況可能損失大部分本金。過去績效不代表未來表現。</li>
+    </ul>
+  </div>
+</section>
+
+<footer>許仙資本 Hsu Xian Capital ・ 本報告僅供基金投資人參考，下次更新：2026/12/10</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+const D = {"capital": 34166.0, "units": 3416.6, "realized": 2058.0150427534036, "unrealized": -7938.959390862956, "equity": 28232.55565189045, "nav": 8.263348256129031, "latest": {"BTC": 74629.4, "ETH": 2121.78, "USDTTWD": 32.925, "at": "2026-11-09 22:26 (台灣時間)"}, "fxStart": 31.817, "trades": [{"id": "B", "side": "做多", "entryDate": "2026-09-03", "entry": 81180, "exitDate": "2026-09-04", "exit": 79010, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.231830500123183, "openFee": 35.0, "status": "停損", "gross": -2673.0721852673073, "closeFee": 34.06442473515644, "fee": 69.06442473515645, "net": -2742.136610002464, "roe": -0.5484273220004928, "days": 1}, {"id": "A", "side": "做多", "entryDate": "2026-09-12", "entry": 77130, "exitDate": "2026-09-28", "exit": 83106, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2965123816932451, "openFee": 35.0, "status": "平倉", "gross": 7747.957992998833, "closeFee": 37.71178529754959, "fee": 72.7117852975496, "net": 7675.246207701283, "roe": 1.5350492415402566, "days": 16}, {"id": "D", "side": "做多", "entryDate": "2026-10-11", "entry": 83060, "exitDate": "2026-10-12", "exit": 82810, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2039489525644114, "openFee": 35.0, "status": "平倉", "gross": -300.98723814110286, "closeFee": 34.894654466650614, "fee": 69.89465446665062, "net": -370.88189260775346, "roe": -0.07417637852155069, "days": 1}, {"id": "C", "side": "做多", "entryDate": "2026-11-04", "entry": 80080, "exitDate": "2026-11-05", "exit": 78130, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2487512487512487, "openFee": 35.0, "status": "平倉", "gross": -2435.064935064935, "closeFee": 34.147727272727266, "fee": 69.14772727272727, "net": -2504.2126623376626, "roe": -0.5008425324675325, "days": 1}, {"id": "H", "side": "做多", "entryDate": "2026-09-14", "entry": 78800, "exitDate": null, "exit": null, "margin": 15000, "lev": 10, "notional": 150000, "qty": 1.9035532994923858, "openFee": 52.5, "status": "持倉中", "mark": 74629.4, "unrl": -7938.959390862956, "liq": 60098.38937776236, "markValue": 142061.04060913704}], "series": [{"d": "2026-09-01", "v": 34166.0, "btc": 77914.4, "fx": 31.817}, {"d": "2026-09-02", "v": 34166.0, "btc": 77290.0, "fx": 31.822}, {"d": "2026-09-03", "v": 34351.13, "btc": 81358.7, "fx": 31.758}, {"d": "2026-09-04", "v": 31423.86, "btc": 79427.7, "fx": 31.75}, {"d": "2026-09-05", "v": 31423.86, "btc": 79800.5, "fx": 31.761}, {"d": "2026-09-06", "v": 31423.86, "btc": 79718.0, "fx": 31.75}, {"d": "2026-09-07", "v": 31423.86, "btc": 78834.1, "fx": 31.663}, {"d": "2026-09-08", "v": 31423.86, "btc": 78905.4, "fx": 31.577}, {"d": "2026-09-09", "v": 31423.86, "btc": 78595.3, "fx": 31.57}, {"d": "2026-09-10", "v": 31423.86, "btc": 77250.5, "fx": 31.718}, {"d": "2026-09-11", "v": 31423.86, "btc": 77727.0, "fx": 31.726}, {"d": "2026-09-12", "v": 31719.73, "btc": 77385.2, "fx": 31.713}, {"d": "2026-09-13", "v": 31391.85, "btc": 77132.3, "fx": 31.694}, {"d": "2026-09-14", "v": 32783.76, "btc": 78575.7, "fx": 31.763}, {"d": "2026-09-15", "v": 26159.63, "btc": 76505.7, "fx": 32.01}, {"d": "2026-09-16", "v": 23867.42, "btc": 75789.4, "fx": 31.979}, {"d": "2026-09-17", "v": 27037.73, "btc": 76780.1, "fx": 31.892}, {"d": "2026-09-18", "v": 39673.51, "btc": 80728.7, "fx": 31.75}, {"d": "2026-09-19", "v": 42613.09, "btc": 81647.3, "fx": 31.753}, {"d": "2026-09-20", "v": 40277.68, "btc": 80917.5, "fx": 31.778}, {"d": "2026-09-21", "v": 56323.45, "btc": 85931.7, "fx": 31.777}, {"d": "2026-09-22", "v": 57882.84, "btc": 86419.0, "fx": 31.732}, {"d": "2026-09-23", "v": 50142.2, "btc": 84000.1, "fx": 31.848}, {"d": "2026-09-24", "v": 51484.63, "btc": 84419.6, "fx": 31.978}, {"d": "2026-09-25", "v": 49501.87, "btc": 83800.0, "fx": 31.94}, {"d": "2026-09-26", "v": 50641.73, "btc": 84156.2, "fx": 31.925}, {"d": "2026-09-27", "v": 51628.95, "btc": 84464.7, "fx": 31.928}, {"d": "2026-09-28", "v": 47747.94, "btc": 83371.1, "fx": 31.885}, {"d": "2026-09-29", "v": 47191.91, "btc": 83079.0, "fx": 31.9}, {"d": "2026-09-30", "v": 49200.92, "btc": 84134.4, "fx": 31.909}, {"d": "2026-10-01", "v": 49264.69, "btc": 84167.9, "fx": 31.943}, {"d": "2026-10-02", "v": 51477.0, "btc": 85330.1, "fx": 31.985}, {"d": "2026-10-03", "v": 50590.33, "btc": 84864.3, "fx": 31.984}, {"d": "2026-10-04", "v": 51343.56, "btc": 85260.0, "fx": 31.916}, {"d": "2026-10-05", "v": 51355.75, "btc": 85266.4, "fx": 31.805}, {"d": "2026-10-06", "v": 52224.53, "btc": 85722.8, "fx": 31.867}, {"d": "2026-10-07", "v": 47913.74, "btc": 83458.2, "fx": 31.927}, {"d": "2026-10-08", "v": 43294.01, "btc": 81031.3, "fx": 32.185}, {"d": "2026-10-09", "v": 46798.64, "btc": 82872.4, "fx": 32.155}, {"d": "2026-10-10", "v": 47151.18, "btc": 83057.6, "fx": 32.107}, {"d": "2026-10-11", "v": 49737.57, "btc": 83902.1, "fx": 32.056}, {"d": "2026-10-12", "v": 46140.13, "btc": 82721.3, "fx": 32.056}, {"d": "2026-10-13", "v": 47490.32, "btc": 83430.6, "fx": 32.159}, {"d": "2026-10-14", "v": 44094.0, "btc": 81646.4, "fx": 32.2}, {"d": "2026-10-15", "v": 45560.31, "btc": 82416.7, "fx": 32.355}, {"d": "2026-10-16", "v": 43538.54, "btc": 81354.6, "fx": 32.447}, {"d": "2026-10-17", "v": 43529.03, "btc": 81349.6, "fx": 32.46}, {"d": "2026-10-18", "v": 43196.67, "btc": 81175.0, "fx": 32.462}, {"d": "2026-10-19", "v": 44655.17, "btc": 81941.2, "fx": 32.473}, {"d": "2026-10-20", "v": 45929.03, "btc": 82610.4, "fx": 32.597}, {"d": "2026-10-21", "v": 49601.17, "btc": 84539.5, "fx": 32.368}, {"d": "2026-10-22", "v": 44155.87, "btc": 81678.9, "fx": 32.69}, {"d": "2026-10-23", "v": 44158.53, "btc": 81680.3, "fx": 32.74}, {"d": "2026-10-24", "v": 40586.13, "btc": 79803.6, "fx": 32.773}, {"d": "2026-10-25", "v": 42172.75, "btc": 80637.1, "fx": 32.791}, {"d": "2026-10-26", "v": 41778.52, "btc": 80430.0, "fx": 32.615}, {"d": "2026-10-27", "v": 42019.7, "btc": 80556.7, "fx": 32.452}, {"d": "2026-10-28", "v": 42015.32, "btc": 80554.4, "fx": 32.424}, {"d": "2026-10-29", "v": 44341.08, "btc": 81776.2, "fx": 32.73}, {"d": "2026-10-30", "v": 36379.47, "btc": 77593.7, "fx": 32.785}, {"d": "2026-10-31", "v": 36311.9, "btc": 77558.2, "fx": 32.794}, {"d": "2026-11-01", "v": 37119.57, "btc": 77982.5, "fx": 32.694}, {"d": "2026-11-02", "v": 36230.8, "btc": 77515.6, "fx": 32.67}, {"d": "2026-11-03", "v": 36579.15, "btc": 77698.6, "fx": 32.797}, {"d": "2026-11-04", "v": 41770.47, "btc": 80299.9, "fx": 32.853}, {"d": "2026-11-05", "v": 30914.85, "btc": 76038.5, "fx": 33.043}, {"d": "2026-11-06", "v": 30578.11, "btc": 75861.6, "fx": 32.826}, {"d": "2026-11-07", "v": 30393.47, "btc": 75764.6, "fx": 32.816}, {"d": "2026-11-08", "v": 30983.95, "btc": 76074.8, "fx": 32.886}, {"d": "2026-11-09", "v": 28232.56, "btc": 74629.4, "fx": 32.925}], "investors": [{"name": "胡春惠", "deposit": 31118, "units": 3111.8}, {"name": "黃新畬", "deposit": 1524, "units": 152.4}, {"name": "黃新甯", "deposit": 1524, "units": 152.4}]};
+const TRADE_NOTE = {B:"",A:"",D:"",C:"",H:""};
+let cur = "USDT";
+const $ = id => document.getElementById(id);
+const lfx = D.latest.USDTTWD;
+const fmt = (v, d=0) => v.toLocaleString("zh-TW",{minimumFractionDigits:d,maximumFractionDigits:d});
+const md = s => { const [y,m,d] = s.split("-"); return `${+m}/${+d}`; };
+function money(usdt, fx=lfx, sign=false){
+  const v = cur==="TWD" ? usdt*fx : usdt;
+  const s = fmt(Math.abs(v), cur==="TWD"?0:2);
+  const p = sign ? (v>0?"+":v<0?"−":"") : (v<0?"−":"");
+  return p + (cur==="TWD" ? "NT$" : "") + s + (cur==="USDT" ? " U" : "");
+}
+const cls = v => v>0?"up":v<0?"down":"";
+const pct = (v,sign=true) => (sign&&v>0?"+":v<0?"−":"") + fmt(Math.abs(v*100),2) + "%";
+const span = (txt,c) => `<span class="${c}">${txt}</span>`;
+
+function kpis(){
+  const r = D.equity/D.capital - 1;
+  $("k-eq").textContent = money(D.equity);
+  $("k-eq-s").innerHTML = `投入本金 ${money(D.capital, cur==="TWD"?D.fxStart:lfx)}・` + span(pct(r),cls(r));
+  $("k-nav").innerHTML = span(D.nav.toFixed(3), cls(D.nav-10));
+  $("k-nav-s").innerHTML = "期間報酬 " + span(pct(D.nav/10-1),cls(D.nav-10));
+  $("k-real").innerHTML = span(money(D.realized,lfx,true),cls(D.realized));
+  $("k-unrl").innerHTML = span(money(D.unrealized,lfx,true),cls(D.unrealized));
+  $("k-unrl-s").textContent = `持倉 1 筆，BTC 現價 ${fmt(D.latest.BTC,1)}`;
+  $("asof").textContent = `估值時點：${D.latest.at}`;
+  $("fxnote").textContent = `USDT/TWD ${D.latest.USDTTWD}`;
+}
+
+function months(){
+  const s = D.series, by = {};
+  s.forEach(p => { by[p.d.slice(0,7)] = p; });
+  let prev = {v:D.capital, fx:D.fxStart}, html = "";
+  Object.keys(by).sort().forEach(k => {
+    const end = by[k], pl = end.v - prev.v, r = end.v/prev.v - 1, cum = end.v/D.capital - 1;
+    const [y,m] = k.split("-");
+    const label = `${y}/${m}` + (end.d === s[s.length-1].d ? `（至 ${md(end.d)}）` : "");
+    const v0 = cur==="TWD" ? prev.v*prev.fx : prev.v, v1 = cur==="TWD" ? end.v*end.fx : end.v;
+    const unit = x => (cur==="TWD"?"NT$":"") + fmt(x, cur==="TWD"?0:2);
+    const plv = v1 - v0;
+    html += `<tr><td>${label}</td><td>${unit(v0)}</td><td>${unit(v1)}</td>
+      <td class="${cls(plv)}">${plv>0?"+":plv<0?"−":""}${unit(Math.abs(plv))}</td>
+      <td class="${cls(r)}">${pct(r)}</td><td class="${cls(cum)}">${pct(cum)}</td></tr>`;
+    prev = end;
+  });
+  $("months").innerHTML = html;
+}
+
+function position(){
+  const h = D.trades.find(t => !t.exitDate);
+  const dist = (h.mark - h.liq)/h.mark;
+  const roe = h.unrl/h.margin;
+  $("pos").innerHTML = `
+  <div class="main">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="tag">持倉中</span><span>做多 ${h.lev} 倍・${md(h.entryDate)} 進場</span></div>
+    <div><div class="risk">未實現損益</div><div class="big ${cls(h.unrl)}">${money(h.unrl,lfx,true)}</div>
+      <div class="risk">對保證金報酬 <span class="${cls(roe)}">${pct(roe)}</span></div></div>
+    <dl class="dl">
+      <div><dt>保證金</dt><dd>${money(h.margin)}</dd></div>
+      <div><dt>開倉倉位價值</dt><dd>${money(h.notional)}</dd></div>
+      <div><dt>目前倉位價值</dt><dd>${money(h.markValue)}</dd></div>
+      <div><dt>數量</dt><dd>${h.qty.toFixed(4)} BTC</dd></div>
+      <div><dt>均價</dt><dd>${fmt(h.entry)}</dd></div>
+      <div><dt>現價</dt><dd>${fmt(h.mark,1)}</dd></div>
+      <div><dt>開倉手續費</dt><dd>${money(-h.openFee)}</dd></div>
+    </dl>
+  </div>
+  <div class="side">
+    <div><div class="risk">估算強平價（全倉）</div><div class="big">${fmt(h.liq)}</div></div>
+    <div class="risk">BTC 還要再跌 <b style="color:var(--ink)">${pct(dist,false)}</b> 才會觸及強平價</div>
+    <div class="meter" aria-hidden="true"><span style="width:${Math.max(4,Math.min(100,100-dist*100*2.5))}%"></span></div>
+    <div class="risk">全倉模式由整個帳戶權益承擔虧損。實際強平價請以 Bybit 顯示為準。</div>
+    <div class="fill log"><b>行情看法（持倉）</b><span>待填寫：這筆單的持有理由與出場計畫。</span></div>
+  </div>`;
+}
+
+function trades(){
+  const list = D.trades.filter(t => t.exitDate).sort((a,b)=>a.entryDate.localeCompare(b.entryDate));
+  $("trades").innerHTML = list.map(t => `
+  <details class="trade">
+    <summary>
+      <span class="id">${t.id}</span>
+      <span class="route">${md(t.entryDate)} ${fmt(t.entry)} → ${md(t.exitDate)} ${fmt(t.exit)}
+        <small>做多 ${t.lev} 倍・保證金 ${money(t.margin)}・${t.status}</small></span>
+      <span class="pl ${cls(t.net)}">${money(t.net,lfx,true)}</span>
+    </summary>
+    <div class="body">
+      <dl class="dl">
+        <div><dt>倉位價值</dt><dd>${money(t.notional)}</dd></div>
+        <div><dt>數量</dt><dd>${t.qty.toFixed(4)} BTC</dd></div>
+        <div><dt>持有天數</dt><dd>${t.days} 天</dd></div>
+        <div><dt>毛損益</dt><dd class="${cls(t.gross)}">${money(t.gross,lfx,true)}</dd></div>
+        <div><dt>手續費</dt><dd>${money(-t.fee)}</dd></div>
+        <div><dt>淨損益</dt><dd class="${cls(t.net)}">${money(t.net,lfx,true)}</dd></div>
+        <div><dt>對保證金報酬</dt><dd class="${cls(t.roe)}">${pct(t.roe)}</dd></div>
+        <div><dt>估算強平價（逐倉參考）</dt><dd>${fmt(t.entry*(1-1/t.lev+0.005))}</dd></div>
+      </dl>
+      <div class="fill log"><b>操作紀錄・${md(t.exitDate)}</b><span>${TRADE_NOTE[t.id] || "待填寫：進出場理由。"}</span></div>
+    </div>
+  </details>`).join("");
+}
+
+function investors(){
+  let html="", tot={dep:0,u:0,val:0};
+  D.investors.forEach(p => {
+    const val = p.units*D.nav, pl = val - p.deposit, r = pl/p.deposit;
+    tot.dep+=p.deposit; tot.u+=p.units; tot.val+=val;
+    const depShow = money(p.deposit, cur==="TWD"?D.fxStart:lfx);
+    const plv = cur==="TWD" ? val*lfx - p.deposit*D.fxStart : pl;
+    const rv = cur==="TWD" ? plv/(p.deposit*D.fxStart) : r;
+    html += `<tr><td>${p.name}</td><td>${depShow}</td><td>${fmt(p.units,1)}</td><td>${money(val)}</td>
+      <td class="${cls(plv)}">${plv>0?"+":"−"}${cur==="TWD"?"NT$"+fmt(Math.abs(plv)):fmt(Math.abs(plv),2)+" U"}</td><td class="${cls(rv)}">${pct(rv)}</td></tr>`;
+  });
+  $("inv").innerHTML = html;
+  const pl = cur==="TWD" ? tot.val*lfx - tot.dep*D.fxStart : tot.val - tot.dep;
+  const rv = cur==="TWD" ? pl/(tot.dep*D.fxStart) : pl/tot.dep;
+  $("inv-total").innerHTML = `<tr><td>合計</td><td>${money(tot.dep, cur==="TWD"?D.fxStart:lfx)}</td><td>${fmt(tot.u,1)}</td><td>${money(tot.val)}</td>
+    <td class="${cls(pl)}">${pl>0?"+":"−"}${cur==="TWD"?"NT$"+fmt(Math.abs(pl)):fmt(Math.abs(pl),2)+" U"}</td><td class="${cls(rv)}">${pct(rv)}</td></tr>`;
+}
+
+function drawLine({el, tip, pts, base, color, markers, yText, tipText, label}){
+  const W = Math.max(320, el.clientWidth), H = W<500 ? 250 : 310;
+  const m = {t:28,r:14,b:30,l: W<500?52:64};
+  const ys = pts.map(p=>p.y).concat(base!=null?[base]:[]).concat((markers||[]).map(k=>k.price));
+  let lo = Math.min(...ys), hi = Math.max(...ys);
+  const pad = (hi-lo)*0.08; lo -= pad; hi += pad;
+  const step = niceStep((hi-lo)/4); lo = Math.floor(lo/step)*step; hi = Math.ceil(hi/step)*step;
+  const L = pts.length-1;
+  const x = i => m.l + i*(W-m.l-m.r)/L;
+  const y = v => m.t + (hi-v)/(hi-lo)*(H-m.t-m.b);
+  let g = "";
+  for (let v=lo; v<=hi+1e-6; v+=step){
+    g += `<line x1="${m.l}" x2="${W-m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>`;
+    g += `<text x="${m.l-8}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-num)">${yText(v)}</text>`;
+  }
+  pts.forEach((p,i) => { if (p.d.endsWith("-01")) {
+    g += `<line x1="${x(i)}" x2="${x(i)}" y1="${m.t}" y2="${H-m.b}" stroke="var(--line)" stroke-dasharray="2 3"/>`;
+    g += `<text x="${x(i)+4}" y="${H-m.b+18}" font-size="11" fill="var(--muted)">${+p.d.slice(5,7)} 月</text>`; }});
+  const line = pts.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(p.y).toFixed(1)}`).join("");
+  if (base!=null) g += `<line x1="${m.l}" x2="${W-m.r}" y1="${y(base)}" y2="${y(base)}" stroke="var(--muted)" stroke-width="1.2" stroke-dasharray="5 4"/>`;
+  g += `<path d="${line}L${x(L)},${H-m.b}L${x(0)},${H-m.b}Z" fill="${color}" fill-opacity=".08"/>`;
+  g += `<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>`;
+  (markers||[]).forEach(k => {
+    const i = pts.findIndex(p=>p.d===k.d); if (i<0) return;
+    const c = k.type==="B" ? "var(--down)" : "var(--up)", dir = k.type==="B" ? 1 : -1;
+    const cx = x(i), cy = y(k.price), my = cy + dir*17;
+    g += `<line x1="${cx}" x2="${cx}" y1="${cy}" y2="${my}" stroke="${c}" stroke-width="1.2"/>`;
+    g += `<circle cx="${cx}" cy="${cy}" r="2.6" fill="${c}"/>`;
+    g += `<circle cx="${cx}" cy="${my}" r="8" fill="${c}" stroke="var(--panel)" stroke-width="1.5"/>`;
+    g += `<text x="${cx}" y="${my+3.6}" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="var(--f-num)">${k.type}</text>`;
+  });
+  g += `<circle cx="${x(L)}" cy="${y(pts[L].y)}" r="5" fill="${color}" stroke="var(--panel)" stroke-width="2"/>`;
+  g += `<line class="cross" x1="0" x2="0" y1="${m.t}" y2="${H-m.b}" stroke="var(--ink)" stroke-opacity=".35" visibility="hidden"/>`;
+  g += `<rect class="hit" x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent"/>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${label}">${g}</svg>`;
+  const hit = el.querySelector(".hit"), cross = el.querySelector(".cross");
+  const move = e => {
+    const r = el.querySelector("svg").getBoundingClientRect(), k = W/r.width;
+    const i = Math.max(0, Math.min(L, Math.round(((e.clientX-r.left)*k-m.l)/(W-m.l-m.r)*L)));
+    const p = pts[i];
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility","visible");
+    tip.innerHTML = tipText(p); tip.hidden = false;
+    const box = el.parentElement.getBoundingClientRect(), ox = r.left-box.left, oy = r.top-box.top;
+    let left = x(i)/k + ox + 12;
+    if (left + tip.offsetWidth > box.width - 6) left = x(i)/k + ox - tip.offsetWidth - 12;
+    tip.style.left = Math.max(6,left) + "px";
+    const ty = y(p.y)/k + oy - tip.offsetHeight - 10;
+    tip.style.top = (ty < 4 ? y(p.y)/k + oy + 14 : ty) + "px";
+  };
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointerleave", () => { tip.hidden = true; cross.setAttribute("visibility","hidden"); });
+}
+
+function tradeEvents(){
+  const ev = {};
+  D.trades.forEach(t => { (ev[t.entryDate] ||= []).push(`${t.id === "H" ? "持倉" : t.id} 買進 B ${fmt(t.entry)}`);
+    if (t.exitDate) (ev[t.exitDate] ||= []).push(`${t.id} 賣出 S ${fmt(t.exit)}`); });
+  return ev;
+}
+function chart(){
+  if (!$("chart-btc").hidden) btcLine();
+  const base = cur==="TWD" ? D.capital*D.fxStart : D.capital;
+  drawLine({ el:$("chart"), tip:$("tip"), color:"var(--accent)", base, label:"每日基金淨值走勢",
+    pts: D.series.map(p => ({d:p.d, v:p.v, btc:p.btc, y: cur==="TWD" ? p.v*p.fx : p.v})),
+    yText: short,
+    tipText: p => `<b>${p.d.replaceAll("-","/")}</b><br>淨值 ${cur==="TWD"?"NT$"+fmt(p.y):fmt(p.y,2)+" U"}<br>報酬 ${pct(p.v/D.capital-1)}・BTC ${fmt(p.btc,0)}` });
+}
+
+function btcLine(){
+  const ev = tradeEvents();
+  const markers = [];
+  D.trades.forEach(t => { markers.push({d:t.entryDate, price:t.entry, type:"B"});
+    if (t.exitDate) markers.push({d:t.exitDate, price:t.exit, type:"S"}); });
+  drawLine({ el:$("chart-btc"), tip:$("tip-btc"), color:"var(--ink)", base:D.trades.find(t=>!t.exitDate).entry,
+    label:"BTC 每日收盤價與買賣點",
+    pts: D.series.map(p => ({d:p.d, y:p.btc})), markers,
+    yText: v => (v/1000).toFixed(v%1000?1:0)+"k",
+    tipText: p => `<b>${p.d.replaceAll("-","/")}</b><br>BTC 收盤 ${fmt(p.y,1)}` + (ev[p.d] ? "<br>"+ev[p.d].join("<br>") : "") });
+}
+
+/* ===== K 線 ===== */
+const TW = 8*3600;                       // 圖上時間以台灣時間顯示
+const TF_VIEW = {"1H":168, "4H":180, "1D":120, "1W":104};
+let K = null, kchart = null, kseries = null, tf = "1D", kbars = [];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const dayStart = d => Date.parse(d + "T00:00:00+08:00")/1000;
+
+function kTheme(){
+  return {
+    layout:{background:{type:"solid", color:css("--panel")}, textColor:css("--muted"), fontFamily:"IBM Plex Mono, ui-monospace, monospace", fontSize:11},
+    grid:{vertLines:{color:css("--line")}, horzLines:{color:css("--line")}},
+    rightPriceScale:{borderColor:css("--line")},
+    timeScale:{borderColor:css("--line"), timeVisible:true, secondsVisible:false, rightOffset:6},
+    crosshair:{mode:0},
+  };
+}
+function kSeriesColors(){
+  const up = css("--up"), dn = css("--down");
+  return {upColor:up, downColor:dn, borderUpColor:up, borderDownColor:dn, wickUpColor:up, wickDownColor:dn};
+}
+/* 交易只有日期：日線、週線放在包含該日的 K 棒；1 小時、4 小時放在當天第一根價格區間包含成交價的 K 棒 */
+function barFor(bars, date, price){
+  const s = dayStart(date), e = s + 86400;
+  if (tf === "1D" || tf === "1W") {
+    let pick = null;
+    for (const b of bars) { if (b[0] <= s) pick = b; else break; }
+    return pick;
+  }
+  const day = bars.filter(b => b[0] >= s && b[0] < e);
+  if (!day.length) return null;
+  return day.find(b => b[3] <= price && price <= b[2])
+      || day.reduce((a,b) => Math.abs((a[2]+a[3])/2-price) <= Math.abs((b[2]+b[3])/2-price) ? a : b);
+}
+function kMarkers(bars){
+  const ms = [];
+  D.trades.forEach(t => {
+    [["B", t.entryDate, t.entry], ["S", t.exitDate, t.exit]].forEach(([type, d, p]) => {
+      if (!d) return;
+      const b = barFor(bars, d, p); if (!b) return;
+      ms.push({ time:b[0]+TW, type, label:`${t.id === "H" ? "持倉" : t.id} ${type === "B" ? "買進" : "賣出"} ${fmt(p)}`,
+        position: type === "B" ? "belowBar" : "aboveBar",
+        shape: type === "B" ? "arrowUp" : "arrowDown",
+        color: type === "B" ? css("--down") : css("--up"), text: type });
+    });
+  });
+  return ms.sort((a,b) => a.time - b.time);
+}
+function kFmtTime(sec){
+  const d = new Date(sec*1000), p = n => String(n).padStart(2,"0");
+  const ymd = `${d.getUTCFullYear()}/${p(d.getUTCMonth()+1)}/${p(d.getUTCDate())}`;
+  return (tf === "1H" || tf === "4H") ? `${ymd} ${p(d.getUTCHours())}:00` : (tf === "1W" ? ymd + " 起一週" : ymd);
+}
+function kInfo(bar, marks){
+  if (!bar) bar = kbars[kbars.length-1];
+  if (!bar) return;
+  const [t,o,h,l,c] = bar, ch = c/o - 1;
+  const here = marks.filter(m => m.time === t + TW).map(m => `<b style="color:${m.color}">${m.label}</b>`).join("");
+  $("kinfo").innerHTML = `<span>${kFmtTime(t+TW)}</span><span>開 <b>${fmt(o,1)}</b></span><span>高 <b>${fmt(h,1)}</b></span><span>低 <b>${fmt(l,1)}</b></span><span>收 <b>${fmt(c,1)}</b></span><span class="${cls(ch)}">${pct(ch)}</span>${here}`;
+}
+function kDraw(){
+  if (!K || !kchart) return;
+  const bars = (K.bars && K.bars[tf]) || [];
+  kbars = bars;
+  document.querySelectorAll(".tabs button").forEach(b => {
+    b.setAttribute("aria-pressed", b.dataset.tf === tf);
+    b.disabled = !(K.bars && K.bars[b.dataset.tf] && K.bars[b.dataset.tf].length);
+  });
+  kseries.setData(bars.map(b => ({time:b[0]+TW, open:b[1], high:b[2], low:b[3], close:b[4]})));
+  const marks = kMarkers(bars);
+  kseries.setMarkers(marks.map(({time,position,shape,color,text}) => ({time,position,shape,color,text})));
+  const n = bars.length, v = TF_VIEW[tf];
+  kchart.timeScale().setVisibleLogicalRange({from: Math.max(0, n - v), to: n + 4});
+  kInfo(null, marks);
+  kchart._marks = marks;
+  const first = bars[0] ? kFmtTime(bars[0][0]+TW).split(" ")[0] : "";
+  $("knote").textContent = `資料：${K.source || "OKX BTC-USDT"}，最早到 ${first}，更新於 ${K.updated || "—"}。可左右拖曳看更早的價格，滾輪或雙指縮放。1 小時、4 小時圖的買賣點以當天成交價所在的 K 棒標示。`;
+}
+function kInit(data){
+  K = data;
+  const el = $("kline");
+  kchart = LightweightCharts.createChart(el, {...kTheme(), autoSize:true,
+    localization:{locale:"zh-TW", priceFormatter: p => fmt(p, 0)}});
+  kseries = kchart.addCandlestickSeries({...kSeriesColors(), priceFormat:{type:"price", precision:1, minMove:0.1}});
+  const h = D.trades.find(t => !t.exitDate);
+  if (h) kseries.createPriceLine({price:h.entry, color:css("--muted"), lineWidth:1, lineStyle:2, axisLabelVisible:true, title:"持倉均價"});
+  kchart.subscribeCrosshairMove(p => {
+    const d = p && p.time ? p.seriesData.get(kseries) : null;
+    kInfo(d ? [d.time - TW, d.open, d.high, d.low, d.close] : null, kchart._marks || []);
+  });
+  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { tf = b.dataset.tf; kDraw(); });
+  const mq = matchMedia("(prefers-color-scheme: dark)");
+  const re = () => { kchart.applyOptions(kTheme()); kseries.applyOptions(kSeriesColors()); kDraw(); };
+  mq.addEventListener && mq.addEventListener("change", re);
+  new MutationObserver(re).observe(document.documentElement, {attributes:true, attributeFilter:["data-theme"]});
+  if (!K.bars[tf] || !K.bars[tf].length) tf = Object.keys(K.bars).find(k => K.bars[k].length) || tf;
+  kDraw();
+}
+function kFallback(why){
+  $("kline").hidden = true; $("kinfo").hidden = true;
+  document.querySelector(".tabs").hidden = true;
+  $("chart-btc").hidden = false;
+  $("knote").textContent = `K 線資料暫時無法載入（${why}），先以每日收盤價折線顯示，買賣點標在成交價位置。`;
+  btcLine();
+}
+async function loadOkx(){
+  const map = {"1H":"1H", "4H":"4H", "1D":"1D", "1W":"1W"}, bars = {};
+  await Promise.all(Object.keys(map).map(async k => {
+    const r = await fetch(`https://www.okx.com/api/v5/market/candles?instId=BTC-USDT&bar=${map[k]}&limit=300`);
+    const j = await r.json();
+    bars[k] = (j.data || []).map(x => [Math.floor(+x[0]/1000), +x[1], +x[2], +x[3], +x[4]]).sort((a,b) => a[0]-b[0]);
+  }));
+  if (!Object.values(bars).some(b => b.length)) throw new Error("empty");
+  return {source:"OKX BTC-USDT（即時）", updated:"剛剛", bars};
+}
+async function kStart(){
+  if (typeof LightweightCharts === "undefined") return kFallback("圖表元件未載入");
+  let data = null;
+  try {
+    const r = await fetch("data/ohlc.json", {cache:"no-cache"});
+    if (r.ok) data = await r.json();
+  } catch (e) {}
+  if (!data || !data.bars) { try { data = await loadOkx(); } catch (e) {} }
+  if (!data || !data.bars || !Object.values(data.bars).some(b => b && b.length)) return kFallback("找不到 K 線資料");
+  try { kInit(data); } catch (e) { console.error(e); kFallback("圖表繪製失敗"); }
+}
+function niceStep(raw){ const p = Math.pow(10, Math.floor(Math.log10(raw))), n = raw/p; return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p; }
+function short(v){ return cur==="TWD" ? (v/10000).toFixed(v%10000?1:0)+" 萬" : (Math.abs(v)>=1000 ? (v/1000).toFixed(v%1000?1:0)+"k" : v); }
+
+function render(){ kpis(); months(); position(); trades(); investors(); chart(); }
+function setCur(c){
+  cur = c;
+  $("cur-usdt").setAttribute("aria-pressed", c==="USDT");
+  $("cur-twd").setAttribute("aria-pressed", c==="TWD");
+  const open = [...document.querySelectorAll(".trade")].map(d=>d.open);
+  render();
+  document.querySelectorAll(".trade").forEach((d,i)=>d.open=open[i]);
+}
+$("cur-usdt").onclick = () => setCur("USDT");
+$("cur-twd").onclick = () => setCur("TWD");
+let rw; addEventListener("resize", () => { clearTimeout(rw); rw = setTimeout(chart, 120); });
+render();
+kStart();
+</script>
+
+</body>
+</html>
