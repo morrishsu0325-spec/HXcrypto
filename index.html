@@ -45,10 +45,12 @@ header h1{font-size:clamp(26px,5vw,38px);line-height:1.2}
 .toggle button:focus-visible,.trade summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .fxnote{font-size:12px;color:var(--muted);margin-top:6px;text-align:right}
 
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
 .kpi{background:var(--panel);padding:16px 18px;display:flex;flex-direction:column;gap:4px;min-width:0}
 .kpi .k{font-size:12px;color:var(--muted);letter-spacing:.06em}
-.kpi .v{font-family:var(--f-num);font-size:clamp(20px,3.2vw,26px);font-weight:500;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi .v{font-family:var(--f-num);font-size:clamp(18px,2.6vw,25px);font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi .v .u{font-size:.6em;margin-left:.25em;color:var(--muted)}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.kpi{padding:14px 14px}}
 .kpi .s{font-size:12px;color:var(--muted)}
 .kpi.lead .v{color:var(--accent)}
 
@@ -112,6 +114,14 @@ tfoot td{font-weight:700;border-top:2px solid var(--ink)}
 .fill-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 @media (max-width:640px){.fill-grid{grid-template-columns:1fr}}
 .fill-grid .fill{min-height:120px}
+.views{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.views{grid-template-columns:1fr}}
+.view{background:var(--panel);border:1px solid var(--line);padding:16px 18px;min-width:0}
+.view h3{margin:0 0 6px;font-family:var(--f-display);font-size:16px;color:var(--accent)}
+.view p{margin:0;font-size:14.5px;line-height:1.8}
+.view.mini{padding:12px 14px;background:var(--bg)}
+.view.mini h3{font-size:13px}
+.view.mini p{font-size:13.5px}
 .log{font-size:13px}
 .log b{font-size:12px}
 
@@ -151,9 +161,11 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 <section aria-label="淨值摘要">
   <div class="kpis">
     <div class="kpi lead"><span class="k">基金淨值</span><span class="v" id="k-eq"></span><span class="s" id="k-eq-s"></span></div>
-    <div class="kpi"><span class="k">單位淨值（起始 10.000 USDT）</span><span class="v" id="k-nav"></span><span class="s" id="k-nav-s"></span></div>
+    <div class="kpi"><span class="k">期間損益</span><span class="v" id="k-ret"></span><span class="s" id="k-ret-s"></span></div>
     <div class="kpi"><span class="k">已實現損益</span><span class="v" id="k-real"></span><span class="s">4 筆已平倉，已扣手續費</span></div>
     <div class="kpi"><span class="k">未實現損益</span><span class="v" id="k-unrl"></span><span class="s" id="k-unrl-s"></span></div>
+    <div class="kpi"><span class="k">BTC 現價</span><span class="v" id="b-now"></span><span class="s" id="b-now-s"></span></div>
+    <div class="kpi"><span class="k">BTC 期間漲跌</span><span class="v" id="b-chg"></span><span class="s" id="b-chg-s"></span></div>
   </div>
 </section>
 
@@ -214,36 +226,19 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 <section aria-labelledby="h-inv">
   <h2 id="h-inv">投資人權益</h2>
   <div class="tbl"><table>
-    <thead><tr><th>投資人</th><th>投入本金</th><th>持有單位</th><th>目前價值</th><th>損益</th><th>報酬率</th></tr></thead>
+    <thead><tr><th>投資人</th><th>投入本金</th><th>持有比例</th><th>目前價值</th><th>損益</th><th>報酬率</th></tr></thead>
     <tbody id="inv"></tbody>
     <tfoot id="inv-total"></tfoot>
   </table></div>
 </section>
 
 <section aria-labelledby="h-view">
-  <h2 id="h-view">行情分析與操作說明 <small>經理人撰寫</small></h2>
-  <!-- ===== 填寫區：把「待填寫」那一行換成你的內容即可 ===== -->
-  <div class="fill-grid">
-    <div class="fill"><b>本期市場回顧</b><span>待填寫：9 月到 11 月 BTC 與整體幣市的走勢、重要事件。</span></div>
-    <div class="fill"><b>BTC 行情看法</b><span>待填寫：對後市的看法、關鍵支撐與壓力價位。</span></div>
-    <div class="fill"><b>本期操作檢討</b><span>待填寫：這期做得好與要改進的地方，例如 B、C 停損的原因。</span></div>
-    <div class="fill"><b>下期操作策略</b><span>待填寫：持倉單的處理計畫、加減碼條件、停損設定。</span></div>
-  </div>
-  <div class="fill"><b>經理人的話</b><span>待填寫：給投資人的一段話。</span></div>
-</section>
-
-<section aria-labelledby="h-notes">
-  <h2 id="h-notes">計算方式與風險揭露</h2>
-  <div class="notes">
-    <ul>
-      <li>投入本金 34,166 USDT，2026/9/1 起算，每單位起始淨值 10 USDT，共 3,416.6 單位。</li>
-      <li>基金淨值＝本金＋已實現損益＋未實現損益－持倉單開倉手續費。不使用交易所帳戶餘額，資金費率尚未計入。</li>
-      <li>倉位價值＝保證金×槓桿；數量＝倉位價值÷進場價；損益＝數量×（出場價－進場價）。手續費以 Bybit 限價單 0.035%，開倉、平倉各收一次。</li>
-      <li>每日價值圖使用 OKX 現貨日收盤價（台灣時間日界），與 Bybit 永續合約價格略有差距，僅供參考。</li>
-      <li>強平價為全倉模式的估算值（維持保證金率以 0.5% 計，假設全部本金都在帳戶內），實際以 Bybit 顯示為準。</li>
-      <li>新台幣金額以當日 USDT/TWD 匯率換算，匯率變動也會影響台幣報酬。</li>
-      <li>合約交易使用槓桿，價格反向波動時虧損會放大，最壞情況可能損失大部分本金。過去績效不代表未來表現。</li>
-    </ul>
+  <h2 id="h-view">行情分析與操作說明 <small>操盤手撰寫</small></h2>
+  <div class="views">
+    <article class="view"><h3>本期市場回顧</h3><p>這一、兩個月期間，風險資產出現大幅回撤。美股大跌之後，比特幣通常會在短時間內跟進下跌。</p></article>
+    <article class="view"><h3>BTC 後市看法</h3><p>在股市已經大幅上漲之後，同期的比特幣相較之下仍屬於牛市初期的位置。因此操盤手認為，之後兩者的走勢將出現分歧，股市的資金會轉往幣圈。</p></article>
+    <article class="view"><h3>本期績效說明</h3><p>本期基金淨值的表現雖然較差，但在 9 月 22 日時，基金淨值曾來到約 57,883 USDT，報酬接近 70%。目前整體部位約有 5 倍的實際槓桿（持倉價值 ÷ 基金淨值），高風險帶來高報酬，相對地淨值的波動也會比較大。</p></article>
+    <article class="view"><h3>持倉單看法與操作策略</h3><p>均價 78,800 的持倉單是這一波牛市的底倉，會一直持有、不會去動；其餘資金才會用來做短期的進場交易。78,800 雖然比現價高一些，但以這一波牛市能參與到的價位來說，78,800 已經算是相對保守、便宜的價格。</p></article>
   </div>
 </section>
 
@@ -252,7 +247,7 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 
 <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <script>
-const D = {"capital": 34166.0, "units": 3416.6, "realized": 2058.0150427534036, "unrealized": -7938.959390862956, "equity": 28232.55565189045, "nav": 8.263348256129031, "latest": {"BTC": 74629.4, "ETH": 2121.78, "USDTTWD": 32.925, "at": "2026-11-09 22:26 (台灣時間)"}, "fxStart": 31.817, "trades": [{"id": "B", "side": "做多", "entryDate": "2026-09-03", "entry": 81180, "exitDate": "2026-09-04", "exit": 79010, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.231830500123183, "openFee": 35.0, "status": "停損", "gross": -2673.0721852673073, "closeFee": 34.06442473515644, "fee": 69.06442473515645, "net": -2742.136610002464, "roe": -0.5484273220004928, "days": 1}, {"id": "A", "side": "做多", "entryDate": "2026-09-12", "entry": 77130, "exitDate": "2026-09-28", "exit": 83106, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2965123816932451, "openFee": 35.0, "status": "平倉", "gross": 7747.957992998833, "closeFee": 37.71178529754959, "fee": 72.7117852975496, "net": 7675.246207701283, "roe": 1.5350492415402566, "days": 16}, {"id": "D", "side": "做多", "entryDate": "2026-10-11", "entry": 83060, "exitDate": "2026-10-12", "exit": 82810, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2039489525644114, "openFee": 35.0, "status": "平倉", "gross": -300.98723814110286, "closeFee": 34.894654466650614, "fee": 69.89465446665062, "net": -370.88189260775346, "roe": -0.07417637852155069, "days": 1}, {"id": "C", "side": "做多", "entryDate": "2026-11-04", "entry": 80080, "exitDate": "2026-11-05", "exit": 78130, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2487512487512487, "openFee": 35.0, "status": "平倉", "gross": -2435.064935064935, "closeFee": 34.147727272727266, "fee": 69.14772727272727, "net": -2504.2126623376626, "roe": -0.5008425324675325, "days": 1}, {"id": "H", "side": "做多", "entryDate": "2026-09-14", "entry": 78800, "exitDate": null, "exit": null, "margin": 15000, "lev": 10, "notional": 150000, "qty": 1.9035532994923858, "openFee": 52.5, "status": "持倉中", "mark": 74629.4, "unrl": -7938.959390862956, "liq": 60098.38937776236, "markValue": 142061.04060913704}], "series": [{"d": "2026-09-01", "v": 34166.0, "btc": 77914.4, "fx": 31.817}, {"d": "2026-09-02", "v": 34166.0, "btc": 77290.0, "fx": 31.822}, {"d": "2026-09-03", "v": 34351.13, "btc": 81358.7, "fx": 31.758}, {"d": "2026-09-04", "v": 31423.86, "btc": 79427.7, "fx": 31.75}, {"d": "2026-09-05", "v": 31423.86, "btc": 79800.5, "fx": 31.761}, {"d": "2026-09-06", "v": 31423.86, "btc": 79718.0, "fx": 31.75}, {"d": "2026-09-07", "v": 31423.86, "btc": 78834.1, "fx": 31.663}, {"d": "2026-09-08", "v": 31423.86, "btc": 78905.4, "fx": 31.577}, {"d": "2026-09-09", "v": 31423.86, "btc": 78595.3, "fx": 31.57}, {"d": "2026-09-10", "v": 31423.86, "btc": 77250.5, "fx": 31.718}, {"d": "2026-09-11", "v": 31423.86, "btc": 77727.0, "fx": 31.726}, {"d": "2026-09-12", "v": 31719.73, "btc": 77385.2, "fx": 31.713}, {"d": "2026-09-13", "v": 31391.85, "btc": 77132.3, "fx": 31.694}, {"d": "2026-09-14", "v": 32783.76, "btc": 78575.7, "fx": 31.763}, {"d": "2026-09-15", "v": 26159.63, "btc": 76505.7, "fx": 32.01}, {"d": "2026-09-16", "v": 23867.42, "btc": 75789.4, "fx": 31.979}, {"d": "2026-09-17", "v": 27037.73, "btc": 76780.1, "fx": 31.892}, {"d": "2026-09-18", "v": 39673.51, "btc": 80728.7, "fx": 31.75}, {"d": "2026-09-19", "v": 42613.09, "btc": 81647.3, "fx": 31.753}, {"d": "2026-09-20", "v": 40277.68, "btc": 80917.5, "fx": 31.778}, {"d": "2026-09-21", "v": 56323.45, "btc": 85931.7, "fx": 31.777}, {"d": "2026-09-22", "v": 57882.84, "btc": 86419.0, "fx": 31.732}, {"d": "2026-09-23", "v": 50142.2, "btc": 84000.1, "fx": 31.848}, {"d": "2026-09-24", "v": 51484.63, "btc": 84419.6, "fx": 31.978}, {"d": "2026-09-25", "v": 49501.87, "btc": 83800.0, "fx": 31.94}, {"d": "2026-09-26", "v": 50641.73, "btc": 84156.2, "fx": 31.925}, {"d": "2026-09-27", "v": 51628.95, "btc": 84464.7, "fx": 31.928}, {"d": "2026-09-28", "v": 47747.94, "btc": 83371.1, "fx": 31.885}, {"d": "2026-09-29", "v": 47191.91, "btc": 83079.0, "fx": 31.9}, {"d": "2026-09-30", "v": 49200.92, "btc": 84134.4, "fx": 31.909}, {"d": "2026-10-01", "v": 49264.69, "btc": 84167.9, "fx": 31.943}, {"d": "2026-10-02", "v": 51477.0, "btc": 85330.1, "fx": 31.985}, {"d": "2026-10-03", "v": 50590.33, "btc": 84864.3, "fx": 31.984}, {"d": "2026-10-04", "v": 51343.56, "btc": 85260.0, "fx": 31.916}, {"d": "2026-10-05", "v": 51355.75, "btc": 85266.4, "fx": 31.805}, {"d": "2026-10-06", "v": 52224.53, "btc": 85722.8, "fx": 31.867}, {"d": "2026-10-07", "v": 47913.74, "btc": 83458.2, "fx": 31.927}, {"d": "2026-10-08", "v": 43294.01, "btc": 81031.3, "fx": 32.185}, {"d": "2026-10-09", "v": 46798.64, "btc": 82872.4, "fx": 32.155}, {"d": "2026-10-10", "v": 47151.18, "btc": 83057.6, "fx": 32.107}, {"d": "2026-10-11", "v": 49737.57, "btc": 83902.1, "fx": 32.056}, {"d": "2026-10-12", "v": 46140.13, "btc": 82721.3, "fx": 32.056}, {"d": "2026-10-13", "v": 47490.32, "btc": 83430.6, "fx": 32.159}, {"d": "2026-10-14", "v": 44094.0, "btc": 81646.4, "fx": 32.2}, {"d": "2026-10-15", "v": 45560.31, "btc": 82416.7, "fx": 32.355}, {"d": "2026-10-16", "v": 43538.54, "btc": 81354.6, "fx": 32.447}, {"d": "2026-10-17", "v": 43529.03, "btc": 81349.6, "fx": 32.46}, {"d": "2026-10-18", "v": 43196.67, "btc": 81175.0, "fx": 32.462}, {"d": "2026-10-19", "v": 44655.17, "btc": 81941.2, "fx": 32.473}, {"d": "2026-10-20", "v": 45929.03, "btc": 82610.4, "fx": 32.597}, {"d": "2026-10-21", "v": 49601.17, "btc": 84539.5, "fx": 32.368}, {"d": "2026-10-22", "v": 44155.87, "btc": 81678.9, "fx": 32.69}, {"d": "2026-10-23", "v": 44158.53, "btc": 81680.3, "fx": 32.74}, {"d": "2026-10-24", "v": 40586.13, "btc": 79803.6, "fx": 32.773}, {"d": "2026-10-25", "v": 42172.75, "btc": 80637.1, "fx": 32.791}, {"d": "2026-10-26", "v": 41778.52, "btc": 80430.0, "fx": 32.615}, {"d": "2026-10-27", "v": 42019.7, "btc": 80556.7, "fx": 32.452}, {"d": "2026-10-28", "v": 42015.32, "btc": 80554.4, "fx": 32.424}, {"d": "2026-10-29", "v": 44341.08, "btc": 81776.2, "fx": 32.73}, {"d": "2026-10-30", "v": 36379.47, "btc": 77593.7, "fx": 32.785}, {"d": "2026-10-31", "v": 36311.9, "btc": 77558.2, "fx": 32.794}, {"d": "2026-11-01", "v": 37119.57, "btc": 77982.5, "fx": 32.694}, {"d": "2026-11-02", "v": 36230.8, "btc": 77515.6, "fx": 32.67}, {"d": "2026-11-03", "v": 36579.15, "btc": 77698.6, "fx": 32.797}, {"d": "2026-11-04", "v": 41770.47, "btc": 80299.9, "fx": 32.853}, {"d": "2026-11-05", "v": 30914.85, "btc": 76038.5, "fx": 33.043}, {"d": "2026-11-06", "v": 30578.11, "btc": 75861.6, "fx": 32.826}, {"d": "2026-11-07", "v": 30393.47, "btc": 75764.6, "fx": 32.816}, {"d": "2026-11-08", "v": 30983.95, "btc": 76074.8, "fx": 32.886}, {"d": "2026-11-09", "v": 28232.56, "btc": 74629.4, "fx": 32.925}], "investors": [{"name": "胡春惠", "deposit": 31118, "units": 3111.8}, {"name": "黃新畬", "deposit": 1524, "units": 152.4}, {"name": "黃新甯", "deposit": 1524, "units": 152.4}]};
+const D = {"capital": 34166.0, "units": 3416.6, "realized": 2058.0150427534036, "unrealized": -7938.959390862956, "equity": 28232.55565189045, "nav": 8.263348256129031, "latest": {"BTC": 74629.4, "ETH": 2121.78, "USDTTWD": 32.925, "at": "2026-11-09 22:26 (台灣時間)"}, "fxStart": 31.817, "trades": [{"id": "B", "side": "做多", "entryDate": "2026-09-03", "entry": 81180, "exitDate": "2026-09-04", "exit": 79010, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.231830500123183, "openFee": 35.0, "status": "停損", "gross": -2673.0721852673073, "closeFee": 34.06442473515644, "fee": 69.06442473515645, "net": -2742.136610002464, "roe": -0.5484273220004928, "days": 1}, {"id": "A", "side": "做多", "entryDate": "2026-09-12", "entry": 77130, "exitDate": "2026-09-28", "exit": 83106, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2965123816932451, "openFee": 35.0, "status": "平倉", "gross": 7747.957992998833, "closeFee": 37.71178529754959, "fee": 72.7117852975496, "net": 7675.246207701283, "roe": 1.5350492415402566, "days": 16}, {"id": "D", "side": "做多", "entryDate": "2026-10-11", "entry": 83060, "exitDate": "2026-10-12", "exit": 82810, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2039489525644114, "openFee": 35.0, "status": "平倉", "gross": -300.98723814110286, "closeFee": 34.894654466650614, "fee": 69.89465446665062, "net": -370.88189260775346, "roe": -0.07417637852155069, "days": 1}, {"id": "C", "side": "做多", "entryDate": "2026-11-04", "entry": 80080, "exitDate": "2026-11-05", "exit": 78130, "margin": 5000, "lev": 20, "notional": 100000, "qty": 1.2487512487512487, "openFee": 35.0, "status": "平倉", "gross": -2435.064935064935, "closeFee": 34.147727272727266, "fee": 69.14772727272727, "net": -2504.2126623376626, "roe": -0.5008425324675325, "days": 1}, {"id": "H", "side": "做多", "entryDate": "2026-09-14", "entry": 78800, "exitDate": null, "exit": null, "margin": 15000, "lev": 10, "notional": 150000, "qty": 1.9035532994923858, "openFee": 52.5, "status": "持倉中", "mark": 74629.4, "unrl": -7938.959390862956, "liq": 60098.38937776236, "markValue": 142061.04060913704}], "series": [{"d": "2026-09-01", "v": 34166.0, "btc": 77914.4, "fx": 31.817}, {"d": "2026-09-02", "v": 34166.0, "btc": 77290.0, "fx": 31.822}, {"d": "2026-09-03", "v": 34351.13, "btc": 81358.7, "fx": 31.758}, {"d": "2026-09-04", "v": 31423.86, "btc": 79427.7, "fx": 31.75}, {"d": "2026-09-05", "v": 31423.86, "btc": 79800.5, "fx": 31.761}, {"d": "2026-09-06", "v": 31423.86, "btc": 79718.0, "fx": 31.75}, {"d": "2026-09-07", "v": 31423.86, "btc": 78834.1, "fx": 31.663}, {"d": "2026-09-08", "v": 31423.86, "btc": 78905.4, "fx": 31.577}, {"d": "2026-09-09", "v": 31423.86, "btc": 78595.3, "fx": 31.57}, {"d": "2026-09-10", "v": 31423.86, "btc": 77250.5, "fx": 31.718}, {"d": "2026-09-11", "v": 31423.86, "btc": 77727.0, "fx": 31.726}, {"d": "2026-09-12", "v": 31719.73, "btc": 77385.2, "fx": 31.713}, {"d": "2026-09-13", "v": 31391.85, "btc": 77132.3, "fx": 31.694}, {"d": "2026-09-14", "v": 32783.76, "btc": 78575.7, "fx": 31.763}, {"d": "2026-09-15", "v": 26159.63, "btc": 76505.7, "fx": 32.01}, {"d": "2026-09-16", "v": 23867.42, "btc": 75789.4, "fx": 31.979}, {"d": "2026-09-17", "v": 27037.73, "btc": 76780.1, "fx": 31.892}, {"d": "2026-09-18", "v": 39673.51, "btc": 80728.7, "fx": 31.75}, {"d": "2026-09-19", "v": 42613.09, "btc": 81647.3, "fx": 31.753}, {"d": "2026-09-20", "v": 40277.68, "btc": 80917.5, "fx": 31.778}, {"d": "2026-09-21", "v": 56323.45, "btc": 85931.7, "fx": 31.777}, {"d": "2026-09-22", "v": 57882.84, "btc": 86419.0, "fx": 31.732}, {"d": "2026-09-23", "v": 50142.2, "btc": 84000.1, "fx": 31.848}, {"d": "2026-09-24", "v": 51484.63, "btc": 84419.6, "fx": 31.978}, {"d": "2026-09-25", "v": 49501.87, "btc": 83800.0, "fx": 31.94}, {"d": "2026-09-26", "v": 50641.73, "btc": 84156.2, "fx": 31.925}, {"d": "2026-09-27", "v": 51628.95, "btc": 84464.7, "fx": 31.928}, {"d": "2026-09-28", "v": 47747.94, "btc": 83371.1, "fx": 31.885}, {"d": "2026-09-29", "v": 47191.91, "btc": 83079.0, "fx": 31.9}, {"d": "2026-09-30", "v": 49200.92, "btc": 84134.4, "fx": 31.909}, {"d": "2026-10-01", "v": 49264.69, "btc": 84167.9, "fx": 31.943}, {"d": "2026-10-02", "v": 51477.0, "btc": 85330.1, "fx": 31.985}, {"d": "2026-10-03", "v": 50590.33, "btc": 84864.3, "fx": 31.984}, {"d": "2026-10-04", "v": 51343.56, "btc": 85260.0, "fx": 31.916}, {"d": "2026-10-05", "v": 51355.75, "btc": 85266.4, "fx": 31.805}, {"d": "2026-10-06", "v": 52224.53, "btc": 85722.8, "fx": 31.867}, {"d": "2026-10-07", "v": 47913.74, "btc": 83458.2, "fx": 31.927}, {"d": "2026-10-08", "v": 43294.01, "btc": 81031.3, "fx": 32.185}, {"d": "2026-10-09", "v": 46798.64, "btc": 82872.4, "fx": 32.155}, {"d": "2026-10-10", "v": 47151.18, "btc": 83057.6, "fx": 32.107}, {"d": "2026-10-11", "v": 49737.57, "btc": 83902.1, "fx": 32.056}, {"d": "2026-10-12", "v": 46140.13, "btc": 82721.3, "fx": 32.056}, {"d": "2026-10-13", "v": 47490.32, "btc": 83430.6, "fx": 32.159}, {"d": "2026-10-14", "v": 44094.0, "btc": 81646.4, "fx": 32.2}, {"d": "2026-10-15", "v": 45560.31, "btc": 82416.7, "fx": 32.355}, {"d": "2026-10-16", "v": 43538.54, "btc": 81354.6, "fx": 32.447}, {"d": "2026-10-17", "v": 43529.03, "btc": 81349.6, "fx": 32.46}, {"d": "2026-10-18", "v": 43196.67, "btc": 81175.0, "fx": 32.462}, {"d": "2026-10-19", "v": 44655.17, "btc": 81941.2, "fx": 32.473}, {"d": "2026-10-20", "v": 45929.03, "btc": 82610.4, "fx": 32.597}, {"d": "2026-10-21", "v": 49601.17, "btc": 84539.5, "fx": 32.368}, {"d": "2026-10-22", "v": 44155.87, "btc": 81678.9, "fx": 32.69}, {"d": "2026-10-23", "v": 44158.53, "btc": 81680.3, "fx": 32.74}, {"d": "2026-10-24", "v": 40586.13, "btc": 79803.6, "fx": 32.773}, {"d": "2026-10-25", "v": 42172.75, "btc": 80637.1, "fx": 32.791}, {"d": "2026-10-26", "v": 41778.52, "btc": 80430.0, "fx": 32.615}, {"d": "2026-10-27", "v": 42019.7, "btc": 80556.7, "fx": 32.452}, {"d": "2026-10-28", "v": 42015.32, "btc": 80554.4, "fx": 32.424}, {"d": "2026-10-29", "v": 44341.08, "btc": 81776.2, "fx": 32.73}, {"d": "2026-10-30", "v": 36379.47, "btc": 77593.7, "fx": 32.785}, {"d": "2026-10-31", "v": 36311.9, "btc": 77558.2, "fx": 32.794}, {"d": "2026-11-01", "v": 37119.57, "btc": 77982.5, "fx": 32.694}, {"d": "2026-11-02", "v": 36230.8, "btc": 77515.6, "fx": 32.67}, {"d": "2026-11-03", "v": 36579.15, "btc": 77698.6, "fx": 32.797}, {"d": "2026-11-04", "v": 41770.47, "btc": 80299.9, "fx": 32.853}, {"d": "2026-11-05", "v": 30914.85, "btc": 76038.5, "fx": 33.043}, {"d": "2026-11-06", "v": 30578.11, "btc": 75861.6, "fx": 32.826}, {"d": "2026-11-07", "v": 30393.47, "btc": 75764.6, "fx": 32.816}, {"d": "2026-11-08", "v": 30983.95, "btc": 76074.8, "fx": 32.886}, {"d": "2026-11-09", "v": 28232.56, "btc": 74629.4, "fx": 32.925}], "investors": [{"name": "胡春惠", "deposit": 31118, "units": 3111.8}, {"name": "黃新畬", "deposit": 1524, "units": 152.4}, {"name": "黃新甯", "deposit": 1524, "units": 152.4}], "btcStart": 78588.5, "btcStartNote": "2026/9/1 開盤"};
 const TRADE_NOTE = {B:"",A:"",D:"",C:"",H:""};
 let cur = "USDT";
 const $ = id => document.getElementById(id);
@@ -269,15 +264,23 @@ const cls = v => v>0?"up":v<0?"down":"";
 const pct = (v,sign=true) => (sign&&v>0?"+":v<0?"−":"") + fmt(Math.abs(v*100),2) + "%";
 const span = (txt,c) => `<span class="${c}">${txt}</span>`;
 
+function unit(s){ return s.endsWith(" U") ? s.slice(0,-2) + '<span class="u">U</span>' : s; }
 function kpis(){
   const r = D.equity/D.capital - 1;
-  $("k-eq").textContent = money(D.equity);
-  $("k-eq-s").innerHTML = `投入本金 ${money(D.capital, cur==="TWD"?D.fxStart:lfx)}・` + span(pct(r),cls(r));
-  $("k-nav").innerHTML = span(D.nav.toFixed(3), cls(D.nav-10));
-  $("k-nav-s").innerHTML = "期間報酬 " + span(pct(D.nav/10-1),cls(D.nav-10));
-  $("k-real").innerHTML = span(money(D.realized,lfx,true),cls(D.realized));
-  $("k-unrl").innerHTML = span(money(D.unrealized,lfx,true),cls(D.unrealized));
-  $("k-unrl-s").textContent = `持倉 1 筆，BTC 現價 ${fmt(D.latest.BTC,1)}`;
+  $("k-eq").innerHTML = unit(money(D.equity));
+  $("k-eq-s").textContent = `投入本金 ${money(D.capital, cur==="TWD"?D.fxStart:lfx)}`;
+  const plAmt = cur==="TWD" ? D.equity*lfx - D.capital*D.fxStart : D.equity - D.capital;
+  const plR = cur==="TWD" ? plAmt/(D.capital*D.fxStart) : r;
+  $("k-ret").innerHTML = span(pct(plR), cls(plR));
+  $("k-ret-s").innerHTML = "金額 " + span((plAmt>0?"+":plAmt<0?"−":"") + (cur==="TWD" ? "NT$"+fmt(Math.abs(plAmt)) : fmt(Math.abs(plAmt),2)+" U"), cls(plAmt)) + "・2026/9/1 起算";
+  $("k-real").innerHTML = span(unit(money(D.realized,lfx,true)),cls(D.realized));
+  $("k-unrl").innerHTML = span(unit(money(D.unrealized,lfx,true)),cls(D.unrealized));
+  $("k-unrl-s").textContent = "持倉 1 筆（9/14 進場）";
+  const bchg = D.latest.BTC/D.btcStart - 1;
+  $("b-now").innerHTML = fmt(D.latest.BTC,1) + '<span class="u">USDT</span>';
+  $("b-now-s").textContent = `期初 ${fmt(D.btcStart,1)}（${D.btcStartNote}）`;
+  $("b-chg").innerHTML = span(pct(bchg), cls(bchg));
+  $("b-chg-s").innerHTML = "同期基金 " + span(pct(r), cls(r));
   $("asof").textContent = `估值時點：${D.latest.at}`;
   $("fxnote").textContent = `USDT/TWD ${D.latest.USDTTWD}`;
 }
@@ -325,7 +328,7 @@ function position(){
     <div class="risk">BTC 還要再跌 <b style="color:var(--ink)">${pct(dist,false)}</b> 才會觸及強平價</div>
     <div class="meter" aria-hidden="true"><span style="width:${Math.max(4,Math.min(100,100-dist*100*2.5))}%"></span></div>
     <div class="risk">全倉模式由整個帳戶權益承擔虧損。實際強平價請以 Bybit 顯示為準。</div>
-    <div class="fill log"><b>行情看法（持倉）</b><span>待填寫：這筆單的持有理由與出場計畫。</span></div>
+    <div class="view mini"><h3>持倉定位</h3><p>本基金的底倉，長期持有不動；其餘資金用於短期交易。</p></div>
   </div>`;
 }
 
@@ -350,7 +353,6 @@ function trades(){
         <div><dt>對保證金報酬</dt><dd class="${cls(t.roe)}">${pct(t.roe)}</dd></div>
         <div><dt>估算強平價（逐倉參考）</dt><dd>${fmt(t.entry*(1-1/t.lev+0.005))}</dd></div>
       </dl>
-      <div class="fill log"><b>操作紀錄・${md(t.exitDate)}</b><span>${TRADE_NOTE[t.id] || "待填寫：進出場理由。"}</span></div>
     </div>
   </details>`).join("");
 }
@@ -358,18 +360,18 @@ function trades(){
 function investors(){
   let html="", tot={dep:0,u:0,val:0};
   D.investors.forEach(p => {
-    const val = p.units*D.nav, pl = val - p.deposit, r = pl/p.deposit;
-    tot.dep+=p.deposit; tot.u+=p.units; tot.val+=val;
+    const share = p.deposit/D.capital, val = D.equity*share, pl = val - p.deposit, r = pl/p.deposit;
+    tot.dep+=p.deposit; tot.u+=share; tot.val+=val;
     const depShow = money(p.deposit, cur==="TWD"?D.fxStart:lfx);
     const plv = cur==="TWD" ? val*lfx - p.deposit*D.fxStart : pl;
     const rv = cur==="TWD" ? plv/(p.deposit*D.fxStart) : r;
-    html += `<tr><td>${p.name}</td><td>${depShow}</td><td>${fmt(p.units,1)}</td><td>${money(val)}</td>
+    html += `<tr><td>${p.name}</td><td>${depShow}</td><td>${fmt(share*100,2)}%</td><td>${money(val)}</td>
       <td class="${cls(plv)}">${plv>0?"+":"−"}${cur==="TWD"?"NT$"+fmt(Math.abs(plv)):fmt(Math.abs(plv),2)+" U"}</td><td class="${cls(rv)}">${pct(rv)}</td></tr>`;
   });
   $("inv").innerHTML = html;
   const pl = cur==="TWD" ? tot.val*lfx - tot.dep*D.fxStart : tot.val - tot.dep;
   const rv = cur==="TWD" ? pl/(tot.dep*D.fxStart) : pl/tot.dep;
-  $("inv-total").innerHTML = `<tr><td>合計</td><td>${money(tot.dep, cur==="TWD"?D.fxStart:lfx)}</td><td>${fmt(tot.u,1)}</td><td>${money(tot.val)}</td>
+  $("inv-total").innerHTML = `<tr><td>合計</td><td>${money(tot.dep, cur==="TWD"?D.fxStart:lfx)}</td><td>${fmt(tot.u*100,2)}%</td><td>${money(tot.val)}</td>
     <td class="${cls(pl)}">${pl>0?"+":"−"}${cur==="TWD"?"NT$"+fmt(Math.abs(pl)):fmt(Math.abs(pl),2)+" U"}</td><td class="${cls(rv)}">${pct(rv)}</td></tr>`;
 }
 
@@ -526,6 +528,7 @@ function kDraw(){
   kseries.setMarkers(marks.map(({time,position,shape,color,text}) => ({time,position,shape,color,text})));
   const n = bars.length, v = TF_VIEW[tf];
   kchart.timeScale().setVisibleLogicalRange({from: Math.max(0, n - v), to: n + 4});
+  kchart.priceScale("right").applyOptions({autoScale:true});
   kInfo(null, marks);
   kchart._marks = marks;
   const first = bars[0] ? kFmtTime(bars[0][0]+TW).split(" ")[0] : "";
@@ -536,7 +539,16 @@ function kInit(data){
   const el = $("kline");
   kchart = LightweightCharts.createChart(el, {...kTheme(), autoSize:true,
     localization:{locale:"zh-TW", priceFormatter: p => fmt(p, 0)}});
-  kseries = kchart.addCandlestickSeries({...kSeriesColors(), priceFormat:{type:"price", precision:1, minMove:0.1}});
+  kseries = kchart.addCandlestickSeries({...kSeriesColors(), priceFormat:{type:"price", precision:1, minMove:0.1},
+    autoscaleInfoProvider: () => {
+      const r = kchart.timeScale().getVisibleLogicalRange();
+      if (!r || !kbars.length) return null;
+      const a = Math.max(0, Math.floor(r.from)), b = Math.min(kbars.length-1, Math.ceil(r.to));
+      let lo = Infinity, hi = -Infinity;
+      for (let i = a; i <= b; i++) { lo = Math.min(lo, kbars[i][3]); hi = Math.max(hi, kbars[i][2]); }
+      return isFinite(lo) ? {priceRange:{minValue:lo, maxValue:hi}} : null;
+    }});
+  kchart.priceScale("right").applyOptions({scaleMargins:{top:0.12, bottom:0.12}});
   const h = D.trades.find(t => !t.exitDate);
   if (h) kseries.createPriceLine({price:h.entry, color:css("--muted"), lineWidth:1, lineStyle:2, axisLabelVisible:true, title:"持倉均價"});
   kchart.subscribeCrosshairMove(p => {
